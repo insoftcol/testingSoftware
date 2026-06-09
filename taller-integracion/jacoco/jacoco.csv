@@ -1,0 +1,11 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+Taller Pruebas de Integración — Registraduría,edu.unisabana.tyvs.registry.infrastructure.persistence,RegistryRecord,27,0,0,0,10,0,5,0,5,0
+Taller Pruebas de Integración — Registraduría,edu.unisabana.tyvs.registry.infrastructure.persistence,RegistryRepository,59,111,8,0,16,32,5,7,1,7
+Taller Pruebas de Integración — Registraduría,edu.unisabana.tyvs.registry.delivery.rest,RegistryController,0,29,0,0,0,7,0,2,0,2
+Taller Pruebas de Integración — Registraduría,edu.unisabana.tyvs.registry.domain.model,Gender,0,21,0,0,0,2,0,1,0,1
+Taller Pruebas de Integración — Registraduría,edu.unisabana.tyvs.registry.domain.model,Person,3,30,0,0,1,11,1,5,1,5
+Taller Pruebas de Integración — Registraduría,edu.unisabana.tyvs.registry.domain.model,RegisterResult,0,33,0,0,0,6,0,1,0,1
+Taller Pruebas de Integración — Registraduría,edu.unisabana.tyvs.registry,RegistryApplication,5,3,0,0,2,1,1,1,1,1
+Taller Pruebas de Integración — Registraduría,edu.unisabana.tyvs.registry.config,RegistryConfig,0,19,0,0,0,6,0,3,0,3
+Taller Pruebas de Integración — Registraduría,edu.unisabana.tyvs.registry.domain.model.rq,PersonDTO,18,38,0,0,7,17,1,11,1,11
+Taller Pruebas de Integración — Registraduría,edu.unisabana.tyvs.registry.application.usecase,Registry,22,43,2,8,7,13,3,5,1,2
