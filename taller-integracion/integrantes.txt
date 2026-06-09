@@ -1,0 +1,8 @@
+Integrantes del equipo
+======================
+Fredy Orlando Pulido Quintero
+
+Materia     : Testing y Validación de Software
+Programa    : Maestría en Arquitectura de Software
+Universidad : Universidad de La Sabana
+Año         : 2026
