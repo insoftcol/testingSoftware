@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Cuenta.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PJBA — Pruebas de Integración y Sistema</a> &gt; <a href="index.source.html" class="el_package">edu.unisabana.tyvs.pjba.domain.model</a> &gt; <span class="el_source">Cuenta.java</span></div><h1>Cuenta.java</h1><pre class="source lang-java linenums">package edu.unisabana.tyvs.pjba.domain.model;
+
+public class Cuenta {
+    private final String numeroCuenta;
+    private final TipoCuenta tipoCuenta;
+    private final String entidadBancaria;
+    private double saldo;
+
+    public Cuenta(String numeroCuenta, TipoCuenta tipoCuenta,
+<span class="fc" id="L10">                  String entidadBancaria, double saldo) {</span>
+<span class="fc" id="L11">        this.numeroCuenta    = numeroCuenta;</span>
+<span class="fc" id="L12">        this.tipoCuenta      = tipoCuenta;</span>
+<span class="fc" id="L13">        this.entidadBancaria = entidadBancaria;</span>
+<span class="fc" id="L14">        this.saldo           = saldo;</span>
+<span class="fc" id="L15">    }</span>
+
+<span class="fc" id="L17">    public String    getNumeroCuenta()    { return numeroCuenta;    }</span>
+<span class="nc" id="L18">    public TipoCuenta getTipoCuenta()     { return tipoCuenta;      }</span>
+<span class="fc" id="L19">    public String    getEntidadBancaria() { return entidadBancaria; }</span>
+<span class="fc" id="L20">    public double    getSaldo()           { return saldo;           }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServicioTransferencia.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PJBA — Pruebas de Integración y Sistema</a> &gt; <a href="index.source.html" class="el_package">edu.unisabana.tyvs.pjba.application.usecase</a> &gt; <span class="el_source">ServicioTransferencia.java</span></div><h1>ServicioTransferencia.java</h1><pre class="source lang-java linenums">package edu.unisabana.tyvs.pjba.application.usecase;
+
+import edu.unisabana.tyvs.pjba.application.port.out.TransferenciaRepositoryPort;
+import edu.unisabana.tyvs.pjba.domain.model.SolicitudTransferencia;
+import edu.unisabana.tyvs.pjba.domain.model.TransferenciaResult;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Caso de uso: valida y procesa una transferencia bancaria.
+ *
+ * &lt;p&gt;Aplica todas las reglas de dominio y persiste el resultado
+ * a través del puerto de salida {@link TransferenciaRepositoryPort}.&lt;/p&gt;
+ */
+public class ServicioTransferencia {
+
+    public static final double MONTO_MINIMO  =       0.0;
+    public static final double MONTO_MAXIMO  = 10_000_000.0;
+
+<span class="fc" id="L22">    private static final Set&lt;String&gt; ENTIDADES_SOPORTADAS = new HashSet&lt;&gt;(Arrays.asList(</span>
+        &quot;AV VILLAS&quot;, &quot;BANCOLOMBIA&quot;, &quot;DAVIVIENDA&quot;,
+        &quot;BOGOTA&quot;, &quot;OCCIDENTE&quot;, &quot;NEQUI&quot;
+    ));
+
+    private final TransferenciaRepositoryPort repo;
+
+    /** Constructor con inyección de dependencia (integración y producción). */
+<span class="fc" id="L30">    public ServicioTransferencia(TransferenciaRepositoryPort repo) {</span>
+<span class="fc" id="L31">        this.repo = repo;</span>
+<span class="fc" id="L32">    }</span>
+
+    /** Constructor sin repositorio (compatibilidad con pruebas unitarias puras). */
+<span class="nc" id="L35">    public ServicioTransferencia() {</span>
+<span class="nc" id="L36">        this.repo = null;</span>
+<span class="nc" id="L37">    }</span>
+
+    public TransferenciaResult procesarTransferencia(SolicitudTransferencia solicitud) {
+<span class="fc" id="L40">        TransferenciaResult resultado = validarYProcesar(solicitud);</span>
+
+        // Persistir audit log si hay repositorio disponible
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">        if (repo != null) {</span>
+            try {
+<span class="fc" id="L45">                repo.save(solicitud, resultado);</span>
+<span class="nc" id="L46">            } catch (Exception e) {</span>
+<span class="nc" id="L47">                throw new IllegalStateException(&quot;Error al persistir transferencia: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L48">            }</span>
+        }
+
+<span class="fc" id="L51">        return resultado;</span>
+    }
+
+    private TransferenciaResult validarYProcesar(SolicitudTransferencia solicitud) {
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        if (solicitud == null)</span>
+<span class="fc" id="L56">            return TransferenciaResult.DATOS_INVALIDOS;</span>
+
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if (solicitud.getCuentaOrigen() == null)</span>
+<span class="nc" id="L59">            return TransferenciaResult.CUENTA_ORIGEN_INVALIDA;</span>
+
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if (solicitud.getCuentaOrigen().getNumeroCuenta() == null</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">                || solicitud.getCuentaOrigen().getNumeroCuenta().isEmpty())</span>
+<span class="nc" id="L63">            return TransferenciaResult.CUENTA_ORIGEN_INVALIDA;</span>
+
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if (solicitud.getNumeroCuentaDestino() == null</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">                || solicitud.getNumeroCuentaDestino().isEmpty())</span>
+<span class="nc" id="L67">            return TransferenciaResult.CUENTA_DESTINO_INVALIDA;</span>
+
+<span class="pc bpc" id="L69" title="1 of 4 branches missed.">        if (solicitud.getMonto() &lt;= MONTO_MINIMO || solicitud.getMonto() &gt; MONTO_MAXIMO)</span>
+<span class="fc" id="L70">            return TransferenciaResult.MONTO_INVALIDO;</span>
+
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if (solicitud.getCuentaOrigen().getSaldo() &lt; solicitud.getMonto())</span>
+<span class="fc" id="L73">            return TransferenciaResult.SALDO_INSUFICIENTE;</span>
+
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if (!ENTIDADES_SOPORTADAS.contains(</span>
+<span class="fc" id="L76">                solicitud.getCuentaOrigen().getEntidadBancaria().toUpperCase()))</span>
+<span class="nc" id="L77">            return TransferenciaResult.ENTIDAD_NO_SOPORTADA;</span>
+
+<span class="fc" id="L79">        return TransferenciaResult.EXITOSA;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

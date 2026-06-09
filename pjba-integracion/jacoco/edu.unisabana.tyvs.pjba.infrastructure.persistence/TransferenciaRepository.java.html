@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransferenciaRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PJBA — Pruebas de Integración y Sistema</a> &gt; <a href="index.source.html" class="el_package">edu.unisabana.tyvs.pjba.infrastructure.persistence</a> &gt; <span class="el_source">TransferenciaRepository.java</span></div><h1>TransferenciaRepository.java</h1><pre class="source lang-java linenums">package edu.unisabana.tyvs.pjba.infrastructure.persistence;
+
+import edu.unisabana.tyvs.pjba.application.port.out.TransferenciaRepositoryPort;
+import edu.unisabana.tyvs.pjba.domain.model.SolicitudTransferencia;
+import edu.unisabana.tyvs.pjba.domain.model.TransferenciaResult;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Adaptador de infraestructura: persiste transferencias en H2 via JDBC puro.
+ * No usa Spring Data JPA para mantener el ejemplo didáctico y sin magia implícita.
+ */
+public class TransferenciaRepository implements TransferenciaRepositoryPort {
+
+    private final String jdbcUrl;
+
+<span class="fc" id="L19">    public TransferenciaRepository(String jdbcUrl) {</span>
+<span class="fc" id="L20">        this.jdbcUrl = jdbcUrl;</span>
+<span class="fc" id="L21">    }</span>
+
+    private Connection getConnection() throws SQLException {
+<span class="fc" id="L24">        return DriverManager.getConnection(jdbcUrl, &quot;&quot;, &quot;&quot;);</span>
+    }
+
+    @Override
+    public void initSchema() throws Exception {
+<span class="fc" id="L29">        String ddl = &quot;CREATE TABLE IF NOT EXISTS transferencia_log (&quot; +</span>
+                     &quot;  id            BIGINT AUTO_INCREMENT PRIMARY KEY,&quot; +
+                     &quot;  cuenta_origen VARCHAR(50) NOT NULL,&quot; +
+                     &quot;  cuenta_destino VARCHAR(50) NOT NULL,&quot; +
+                     &quot;  monto         DOUBLE NOT NULL,&quot; +
+                     &quot;  entidad       VARCHAR(50) NOT NULL,&quot; +
+                     &quot;  resultado     VARCHAR(30) NOT NULL&quot; +
+                     &quot;)&quot;;
+<span class="fc" id="L37">        try (Connection con = getConnection(); Statement st = con.createStatement()) {</span>
+<span class="fc" id="L38">            st.execute(ddl);</span>
+        }
+<span class="fc" id="L40">    }</span>
+
+    @Override
+    public void save(SolicitudTransferencia solicitud, TransferenciaResult resultado) throws Exception {
+<span class="fc" id="L44">        String sql = &quot;INSERT INTO transferencia_log&quot; +</span>
+                     &quot;(cuenta_origen, cuenta_destino, monto, entidad, resultado)&quot; +
+                     &quot; VALUES(?, ?, ?, ?, ?)&quot;;
+<span class="fc" id="L47">        try (Connection con = getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {</span>
+<span class="pc bpc" id="L48" title="2 of 4 branches missed.">            String origen  = solicitud != null &amp;&amp; solicitud.getCuentaOrigen() != null</span>
+<span class="pc" id="L49">                             ? solicitud.getCuentaOrigen().getNumeroCuenta() : &quot;N/A&quot;;</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">            String destino = solicitud != null ? solicitud.getNumeroCuentaDestino() : &quot;N/A&quot;;</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">            double monto   = solicitud != null ? solicitud.getMonto() : 0;</span>
+<span class="pc bpc" id="L52" title="2 of 4 branches missed.">            String entidad = solicitud != null &amp;&amp; solicitud.getCuentaOrigen() != null</span>
+<span class="pc" id="L53">                             ? solicitud.getCuentaOrigen().getEntidadBancaria() : &quot;N/A&quot;;</span>
+
+<span class="fc" id="L55">            ps.setString(1, origen);</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">            ps.setString(2, destino != null ? destino : &quot;N/A&quot;);</span>
+<span class="fc" id="L57">            ps.setDouble(3, monto);</span>
+<span class="fc" id="L58">            ps.setString(4, entidad);</span>
+<span class="fc" id="L59">            ps.setString(5, resultado.name());</span>
+<span class="fc" id="L60">            ps.executeUpdate();</span>
+        }
+<span class="fc" id="L62">    }</span>
+
+    @Override
+    public List&lt;TransferenciaRecord&gt; findAll() throws Exception {
+<span class="fc" id="L66">        List&lt;TransferenciaRecord&gt; list = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L67">        String sql = &quot;SELECT id, cuenta_origen, cuenta_destino, monto, entidad, resultado&quot; +</span>
+                     &quot; FROM transferencia_log&quot;;
+<span class="fc" id="L69">        try (Connection con = getConnection();</span>
+<span class="fc" id="L70">             Statement st = con.createStatement();</span>
+<span class="fc" id="L71">             ResultSet rs = st.executeQuery(sql)) {</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">            while (rs.next()) {</span>
+<span class="fc" id="L73">                list.add(new TransferenciaRecord(</span>
+<span class="fc" id="L74">                    rs.getLong(&quot;id&quot;),</span>
+<span class="fc" id="L75">                    rs.getString(&quot;cuenta_origen&quot;),</span>
+<span class="fc" id="L76">                    rs.getString(&quot;cuenta_destino&quot;),</span>
+<span class="fc" id="L77">                    rs.getDouble(&quot;monto&quot;),</span>
+<span class="fc" id="L78">                    rs.getString(&quot;entidad&quot;),</span>
+<span class="fc" id="L79">                    rs.getString(&quot;resultado&quot;)</span>
+                ));
+            }
+        }
+<span class="fc" id="L83">        return list;</span>
+    }
+
+    @Override
+    public void deleteAll() throws Exception {
+<span class="fc" id="L88">        try (Connection con = getConnection(); Statement st = con.createStatement()) {</span>
+<span class="fc" id="L89">            st.executeUpdate(&quot;DELETE FROM transferencia_log&quot;);</span>
+        }
+<span class="fc" id="L91">    }</span>
+
+    @Override
+    public long countExitosas() throws Exception {
+<span class="fc" id="L95">        String sql = &quot;SELECT COUNT(*) FROM transferencia_log WHERE resultado = 'EXITOSA'&quot;;</span>
+<span class="fc" id="L96">        try (Connection con = getConnection();</span>
+<span class="fc" id="L97">             Statement st = con.createStatement();</span>
+<span class="fc" id="L98">             ResultSet rs = st.executeQuery(sql)) {</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">            return rs.next() ? rs.getLong(1) : 0;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

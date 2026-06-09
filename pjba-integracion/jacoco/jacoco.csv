@@ -1,0 +1,12 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+PJBA — Pruebas de Integración y Sistema,edu.unisabana.tyvs.pjba.domain.model,TipoCuenta,0,15,0,0,0,1,0,1,0,1
+PJBA — Pruebas de Integración y Sistema,edu.unisabana.tyvs.pjba.domain.model,Cuenta,3,24,0,0,1,9,1,4,1,4
+PJBA — Pruebas de Integración y Sistema,edu.unisabana.tyvs.pjba.domain.model,SolicitudTransferencia,0,21,0,0,0,8,0,4,0,4
+PJBA — Pruebas de Integración y Sistema,edu.unisabana.tyvs.pjba.domain.model,TransferenciaResult,0,45,0,0,0,4,0,1,0,1
+PJBA — Pruebas de Integración y Sistema,edu.unisabana.tyvs.pjba,PjbaApplication,5,3,0,0,2,1,1,1,1,1
+PJBA — Pruebas de Integración y Sistema,edu.unisabana.tyvs.pjba.delivery.rest,TransferenciaDTO,0,45,0,0,0,13,0,13,0,13
+PJBA — Pruebas de Integración y Sistema,edu.unisabana.tyvs.pjba.delivery.rest,TransferenciaController,6,49,0,2,2,15,0,3,0,2
+PJBA — Pruebas de Integración y Sistema,edu.unisabana.tyvs.pjba.application.usecase,ServicioTransferencia,23,106,8,14,9,23,9,7,1,4
+PJBA — Pruebas de Integración y Sistema,edu.unisabana.tyvs.pjba.infrastructure.persistence,TransferenciaRepository,6,173,8,10,0,45,8,8,0,7
+PJBA — Pruebas de Integración y Sistema,edu.unisabana.tyvs.pjba.infrastructure.persistence,TransferenciaRecord,6,33,0,0,2,12,2,5,2,5
+PJBA — Pruebas de Integración y Sistema,edu.unisabana.tyvs.pjba.config,PjbaConfig,0,19,0,0,0,6,0,3,0,3
