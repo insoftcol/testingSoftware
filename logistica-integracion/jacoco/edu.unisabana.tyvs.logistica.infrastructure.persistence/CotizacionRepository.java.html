@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CotizacionRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Logística — Pruebas de Integración y Sistema</a> &gt; <a href="index.source.html" class="el_package">edu.unisabana.tyvs.logistica.infrastructure.persistence</a> &gt; <span class="el_source">CotizacionRepository.java</span></div><h1>CotizacionRepository.java</h1><pre class="source lang-java linenums">package edu.unisabana.tyvs.logistica.infrastructure.persistence;
+
+import edu.unisabana.tyvs.logistica.application.port.out.CotizacionRepositoryPort;
+import edu.unisabana.tyvs.logistica.domain.model.Cotizacion;
+import edu.unisabana.tyvs.logistica.domain.model.SolicitudEnvio;
+
+import java.sql.*;
+import java.util.*;
+
+public class CotizacionRepository implements CotizacionRepositoryPort {
+
+    private final String jdbcUrl;
+
+<span class="fc" id="L14">    public CotizacionRepository(String jdbcUrl) { this.jdbcUrl = jdbcUrl; }</span>
+
+    private Connection conn() throws SQLException {
+<span class="fc" id="L17">        return DriverManager.getConnection(jdbcUrl, &quot;&quot;, &quot;&quot;);</span>
+    }
+
+    @Override
+    public void initSchema() throws Exception {
+<span class="fc" id="L22">        String ddl = &quot;CREATE TABLE IF NOT EXISTS cotizacion_log (&quot; +</span>
+                     &quot;  id            BIGINT AUTO_INCREMENT PRIMARY KEY,&quot; +
+                     &quot;  ciudad_origen VARCHAR(50)  NOT NULL,&quot; +
+                     &quot;  ciudad_destino VARCHAR(50) NOT NULL,&quot; +
+                     &quot;  peso_kg       DOUBLE       NOT NULL,&quot; +
+                     &quot;  tipo_envio    VARCHAR(20)  NOT NULL,&quot; +
+                     &quot;  estado        VARCHAR(30)  NOT NULL,&quot; +
+                     &quot;  valor_total   DOUBLE       NOT NULL&quot; +
+                     &quot;)&quot;;
+<span class="fc" id="L31">        try (Connection c = conn(); Statement s = c.createStatement()) { s.execute(ddl); }</span>
+<span class="fc" id="L32">    }</span>
+
+    @Override
+    public void save(SolicitudEnvio sol, Cotizacion cot) throws Exception {
+<span class="fc" id="L36">        String sql = &quot;INSERT INTO cotizacion_log&quot; +</span>
+                     &quot;(ciudad_origen,ciudad_destino,peso_kg,tipo_envio,estado,valor_total)&quot; +
+                     &quot; VALUES(?,?,?,?,?,?)&quot;;
+<span class="fc" id="L39">        try (Connection c = conn(); PreparedStatement ps = c.prepareStatement(sql)) {</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">            ps.setString(1, sol != null ? sol.getCiudadOrigen()  : &quot;N/A&quot;);</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">            ps.setString(2, sol != null ? sol.getCiudadDestino() : &quot;N/A&quot;);</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">            ps.setDouble(3, sol != null ? sol.getPesoKg()        : 0.0);</span>
+<span class="pc bpc" id="L43" title="2 of 4 branches missed.">            ps.setString(4, sol != null &amp;&amp; sol.getTipoEnvio() != null</span>
+<span class="pc" id="L44">                            ? sol.getTipoEnvio().name() : &quot;N/A&quot;);</span>
+<span class="fc" id="L45">            ps.setString(5, cot.getEstado().name());</span>
+<span class="fc" id="L46">            ps.setDouble(6, cot.getValorTotal());</span>
+<span class="fc" id="L47">            ps.executeUpdate();</span>
+        }
+<span class="fc" id="L49">    }</span>
+
+    @Override
+    public List&lt;CotizacionRecord&gt; findAll() throws Exception {
+<span class="fc" id="L53">        List&lt;CotizacionRecord&gt; list = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L54">        try (Connection c = conn(); Statement s = c.createStatement();</span>
+<span class="fc" id="L55">             ResultSet rs = s.executeQuery(&quot;SELECT * FROM cotizacion_log&quot;)) {</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">            while (rs.next()) {</span>
+<span class="fc" id="L57">                list.add(new CotizacionRecord(</span>
+<span class="fc" id="L58">                    rs.getLong(&quot;id&quot;),       rs.getString(&quot;ciudad_origen&quot;),</span>
+<span class="fc" id="L59">                    rs.getString(&quot;ciudad_destino&quot;), rs.getDouble(&quot;peso_kg&quot;),</span>
+<span class="fc" id="L60">                    rs.getString(&quot;tipo_envio&quot;),      rs.getString(&quot;estado&quot;),</span>
+<span class="fc" id="L61">                    rs.getDouble(&quot;valor_total&quot;)));</span>
+            }
+        }
+<span class="fc" id="L64">        return list;</span>
+    }
+
+    @Override
+    public void deleteAll() throws Exception {
+<span class="fc" id="L69">        try (Connection c = conn(); Statement s = c.createStatement()) {</span>
+<span class="fc" id="L70">            s.executeUpdate(&quot;DELETE FROM cotizacion_log&quot;);</span>
+        }
+<span class="fc" id="L72">    }</span>
+
+    @Override
+    public long countExitosas() throws Exception {
+<span class="fc" id="L76">        try (Connection c = conn(); Statement s = c.createStatement();</span>
+<span class="fc" id="L77">             ResultSet rs = s.executeQuery(</span>
+                 &quot;SELECT COUNT(*) FROM cotizacion_log WHERE estado='EXITOSA'&quot;)) {
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">            return rs.next() ? rs.getLong(1) : 0;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

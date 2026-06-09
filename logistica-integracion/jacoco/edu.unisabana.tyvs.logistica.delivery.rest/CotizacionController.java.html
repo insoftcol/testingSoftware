@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CotizacionController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Logística — Pruebas de Integración y Sistema</a> &gt; <a href="index.source.html" class="el_package">edu.unisabana.tyvs.logistica.delivery.rest</a> &gt; <span class="el_source">CotizacionController.java</span></div><h1>CotizacionController.java</h1><pre class="source lang-java linenums">package edu.unisabana.tyvs.logistica.delivery.rest;
+
+import edu.unisabana.tyvs.logistica.application.usecase.ServicioTarifa;
+import edu.unisabana.tyvs.logistica.domain.model.*;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping(&quot;/cotizacion&quot;)
+public class CotizacionController {
+
+    private final ServicioTarifa servicio;
+
+<span class="fc" id="L14">    public CotizacionController(ServicioTarifa servicio) { this.servicio = servicio; }</span>
+
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE,
+                 produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity&lt;CotizacionResponseDTO&gt; cotizar(@RequestBody CotizacionRequestDTO dto) {
+        TipoEnvio tipo;
+<span class="fc" id="L20">        try { tipo = TipoEnvio.valueOf(dto.getTipoEnvio().toUpperCase()); }</span>
+<span class="nc" id="L21">        catch (Exception e) {</span>
+<span class="nc" id="L22">            return ResponseEntity.badRequest()</span>
+<span class="nc" id="L23">                .body(new CotizacionResponseDTO(&quot;DATOS_INVALIDOS&quot;, 0.0));</span>
+<span class="fc" id="L24">        }</span>
+<span class="fc" id="L25">        SolicitudEnvio sol = new SolicitudEnvio(</span>
+<span class="fc" id="L26">            dto.getCiudadOrigen(), dto.getCiudadDestino(), dto.getPesoKg(), tipo</span>
+        );
+<span class="fc" id="L28">        Cotizacion c = servicio.cotizar(sol);</span>
+<span class="fc" id="L29">        CotizacionResponseDTO resp = new CotizacionResponseDTO(c.getEstado().name(), c.getValorTotal());</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        return c.isExitosa() ? ResponseEntity.ok(resp) : ResponseEntity.badRequest().body(resp);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

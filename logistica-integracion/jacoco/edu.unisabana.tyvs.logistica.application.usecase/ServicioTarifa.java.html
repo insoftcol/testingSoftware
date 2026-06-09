@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServicioTarifa.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Logística — Pruebas de Integración y Sistema</a> &gt; <a href="index.source.html" class="el_package">edu.unisabana.tyvs.logistica.application.usecase</a> &gt; <span class="el_source">ServicioTarifa.java</span></div><h1>ServicioTarifa.java</h1><pre class="source lang-java linenums">package edu.unisabana.tyvs.logistica.application.usecase;
+
+import edu.unisabana.tyvs.logistica.application.port.out.CotizacionRepositoryPort;
+import edu.unisabana.tyvs.logistica.domain.model.*;
+
+import java.util.*;
+
+/**
+ * Caso de uso: calcula la tarifa de envío y persiste la cotización.
+ */
+public class ServicioTarifa {
+
+    public static final double MONTO_MINIMO  =   0.0;
+    public static final double PESO_MAXIMO   = 500.0;
+    public static final int    LIMITE_KM_CORTA = 200;
+    public static final int    LIMITE_KM_MEDIA = 500;
+    public static final double TARIFA_BASE_CORTA  = 15_000.0;
+    public static final double TARIFA_BASE_MEDIA  = 30_000.0;
+    public static final double TARIFA_BASE_LARGA  = 50_000.0;
+    public static final double COSTO_KG_CORTA = 500.0;
+    public static final double COSTO_KG_MEDIA = 800.0;
+    public static final double COSTO_KG_LARGA = 1_200.0;
+
+<span class="fc" id="L24">    private static final Set&lt;String&gt; CIUDADES_SOPORTADAS = new HashSet&lt;&gt;(Arrays.asList(</span>
+        &quot;BOGOTA&quot;,&quot;MEDELLIN&quot;,&quot;CALI&quot;,&quot;BARRANQUILLA&quot;,&quot;CARTAGENA&quot;,
+        &quot;BUCARAMANGA&quot;,&quot;MANIZALES&quot;,&quot;PEREIRA&quot;
+    ));
+
+<span class="fc" id="L29">    private static final Map&lt;String, Integer&gt; DISTANCIAS = new HashMap&lt;&gt;();</span>
+    static {
+<span class="fc" id="L31">        DISTANCIAS.put(&quot;BARRANQUILLA-BOGOTA&quot;,1018); DISTANCIAS.put(&quot;BARRANQUILLA-BUCARAMANGA&quot;,584);</span>
+<span class="fc" id="L32">        DISTANCIAS.put(&quot;BARRANQUILLA-CALI&quot;,1200);   DISTANCIAS.put(&quot;BARRANQUILLA-CARTAGENA&quot;,125);</span>
+<span class="fc" id="L33">        DISTANCIAS.put(&quot;BARRANQUILLA-MANIZALES&quot;,788);DISTANCIAS.put(&quot;BARRANQUILLA-MEDELLIN&quot;,702);</span>
+<span class="fc" id="L34">        DISTANCIAS.put(&quot;BARRANQUILLA-PEREIRA&quot;,822);  DISTANCIAS.put(&quot;BOGOTA-BUCARAMANGA&quot;,394);</span>
+<span class="fc" id="L35">        DISTANCIAS.put(&quot;BOGOTA-CALI&quot;,462);           DISTANCIAS.put(&quot;BOGOTA-CARTAGENA&quot;,1046);</span>
+<span class="fc" id="L36">        DISTANCIAS.put(&quot;BOGOTA-MANIZALES&quot;,288);      DISTANCIAS.put(&quot;BOGOTA-MEDELLIN&quot;,415);</span>
+<span class="fc" id="L37">        DISTANCIAS.put(&quot;BOGOTA-PEREIRA&quot;,322);        DISTANCIAS.put(&quot;BUCARAMANGA-CALI&quot;,854);</span>
+<span class="fc" id="L38">        DISTANCIAS.put(&quot;BUCARAMANGA-CARTAGENA&quot;,612); DISTANCIAS.put(&quot;BUCARAMANGA-MANIZALES&quot;,377);</span>
+<span class="fc" id="L39">        DISTANCIAS.put(&quot;BUCARAMANGA-MEDELLIN&quot;,457);  DISTANCIAS.put(&quot;BUCARAMANGA-PEREIRA&quot;,401);</span>
+<span class="fc" id="L40">        DISTANCIAS.put(&quot;CALI-CARTAGENA&quot;,1210);       DISTANCIAS.put(&quot;CALI-MANIZALES&quot;,175);</span>
+<span class="fc" id="L41">        DISTANCIAS.put(&quot;CALI-MEDELLIN&quot;,416);         DISTANCIAS.put(&quot;CALI-PEREIRA&quot;,190);</span>
+<span class="fc" id="L42">        DISTANCIAS.put(&quot;CARTAGENA-MANIZALES&quot;,759);   DISTANCIAS.put(&quot;CARTAGENA-MEDELLIN&quot;,673);</span>
+<span class="fc" id="L43">        DISTANCIAS.put(&quot;CARTAGENA-PEREIRA&quot;,803);     DISTANCIAS.put(&quot;MANIZALES-MEDELLIN&quot;,128);</span>
+<span class="fc" id="L44">        DISTANCIAS.put(&quot;MANIZALES-PEREIRA&quot;,43);      DISTANCIAS.put(&quot;MEDELLIN-PEREIRA&quot;,148);</span>
+<span class="fc" id="L45">    }</span>
+
+    private final CotizacionRepositoryPort repo;
+
+<span class="fc" id="L49">    public ServicioTarifa(CotizacionRepositoryPort repo) { this.repo = repo; }</span>
+<span class="nc" id="L50">    public ServicioTarifa() { this.repo = null; }</span>
+
+    public Cotizacion cotizar(SolicitudEnvio solicitud) {
+<span class="fc" id="L53">        Cotizacion cotizacion = calcular(solicitud);</span>
+
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        if (repo != null) {</span>
+<span class="fc" id="L56">            try { repo.save(solicitud, cotizacion); }</span>
+<span class="nc" id="L57">            catch (Exception e) {</span>
+<span class="nc" id="L58">                throw new IllegalStateException(&quot;Error al persistir cotización: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L59">            }</span>
+        }
+<span class="fc" id="L61">        return cotizacion;</span>
+    }
+
+    private Cotizacion calcular(SolicitudEnvio s) {
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if (s == null) return Cotizacion.invalida(CotizacionEstado.DATOS_INVALIDOS);</span>
+
+<span class="pc bpc" id="L67" title="2 of 4 branches missed.">        if (s.getCiudadOrigen() == null || s.getCiudadOrigen().trim().isEmpty())</span>
+<span class="nc" id="L68">            return Cotizacion.invalida(CotizacionEstado.CIUDAD_ORIGEN_INVALIDA);</span>
+
+<span class="fc" id="L70">        String origen = s.getCiudadOrigen().trim().toUpperCase();</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if (!CIUDADES_SOPORTADAS.contains(origen))</span>
+<span class="nc" id="L72">            return Cotizacion.invalida(CotizacionEstado.CIUDAD_ORIGEN_INVALIDA);</span>
+
+<span class="pc bpc" id="L74" title="2 of 4 branches missed.">        if (s.getCiudadDestino() == null || s.getCiudadDestino().trim().isEmpty())</span>
+<span class="nc" id="L75">            return Cotizacion.invalida(CotizacionEstado.CIUDAD_DESTINO_INVALIDA);</span>
+
+<span class="fc" id="L77">        String destino = s.getCiudadDestino().trim().toUpperCase();</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        if (!CIUDADES_SOPORTADAS.contains(destino))</span>
+<span class="nc" id="L79">            return Cotizacion.invalida(CotizacionEstado.CIUDAD_DESTINO_INVALIDA);</span>
+
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        if (origen.equals(destino))</span>
+<span class="fc" id="L82">            return Cotizacion.invalida(CotizacionEstado.MISMA_CIUDAD);</span>
+
+<span class="pc bpc" id="L84" title="1 of 4 branches missed.">        if (s.getPesoKg() &lt;= MONTO_MINIMO || s.getPesoKg() &gt; PESO_MAXIMO)</span>
+<span class="fc" id="L85">            return Cotizacion.invalida(CotizacionEstado.PESO_INVALIDO);</span>
+
+<span class="fc" id="L87">        String clave = claveRuta(origen, destino);</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">        if (!DISTANCIAS.containsKey(clave))</span>
+<span class="nc" id="L89">            return Cotizacion.invalida(CotizacionEstado.RUTA_NO_DISPONIBLE);</span>
+
+<span class="fc" id="L91">        int    dist   = DISTANCIAS.get(clave);</span>
+<span class="fc" id="L92">        double base   = calcularBase(dist, s.getPesoKg());</span>
+<span class="fc" id="L93">        double mult   = calcularMult(s.getTipoEnvio());</span>
+<span class="fc" id="L94">        return Cotizacion.exitosa(base * mult);</span>
+    }
+
+    private double calcularBase(int km, double kg) {
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        if (km &lt; LIMITE_KM_CORTA)  return TARIFA_BASE_CORTA + COSTO_KG_CORTA * kg;</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        if (km &lt;= LIMITE_KM_MEDIA) return TARIFA_BASE_MEDIA + COSTO_KG_MEDIA * kg;</span>
+<span class="nc" id="L100">        return TARIFA_BASE_LARGA + COSTO_KG_LARGA * kg;</span>
+    }
+
+    private double calcularMult(TipoEnvio tipo) {
+<span class="fc bfc" id="L104" title="All 2 branches covered.">        if (tipo == TipoEnvio.EXPRESO)     return 1.5;</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">        if (tipo == TipoEnvio.REFRIGERADO) return 2.0;</span>
+<span class="fc" id="L106">        return 1.0;</span>
+    }
+
+    private String claveRuta(String a, String b) {
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">        return a.compareTo(b) &lt;= 0 ? a + &quot;-&quot; + b : b + &quot;-&quot; + a;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

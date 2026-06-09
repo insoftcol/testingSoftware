@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SolicitudEnvio.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Logística — Pruebas de Integración y Sistema</a> &gt; <a href="index.source.html" class="el_package">edu.unisabana.tyvs.logistica.domain.model</a> &gt; <span class="el_source">SolicitudEnvio.java</span></div><h1>SolicitudEnvio.java</h1><pre class="source lang-java linenums">package edu.unisabana.tyvs.logistica.domain.model;
+
+/**
+ * Representa una solicitud de cotización de envío entre dos ciudades.
+ *
+ * &lt;p&gt;Es un objeto de valor inmutable del dominio logístico. No conoce
+ * bases de datos, HTTP ni ningún framework externo.&lt;/p&gt;
+ *
+ * @param ciudadOrigen  nombre de la ciudad de origen (ej: &quot;BOGOTA&quot;)
+ * @param ciudadDestino nombre de la ciudad de destino (ej: &quot;MEDELLIN&quot;)
+ * @param pesoKg        peso del paquete en kilogramos
+ * @param tipoEnvio     modalidad de envío (NORMAL, EXPRESO, REFRIGERADO)
+ */
+public class SolicitudEnvio {
+
+    private final String   ciudadOrigen;
+    private final String   ciudadDestino;
+    private final double   pesoKg;
+    private final TipoEnvio tipoEnvio;
+
+    public SolicitudEnvio(String ciudadOrigen, String ciudadDestino,
+<span class="fc" id="L22">                          double pesoKg, TipoEnvio tipoEnvio) {</span>
+<span class="fc" id="L23">        this.ciudadOrigen  = ciudadOrigen;</span>
+<span class="fc" id="L24">        this.ciudadDestino = ciudadDestino;</span>
+<span class="fc" id="L25">        this.pesoKg        = pesoKg;</span>
+<span class="fc" id="L26">        this.tipoEnvio     = tipoEnvio;</span>
+<span class="fc" id="L27">    }</span>
+
+<span class="fc" id="L29">    public String    getCiudadOrigen()  { return ciudadOrigen;  }</span>
+<span class="fc" id="L30">    public String    getCiudadDestino() { return ciudadDestino; }</span>
+<span class="fc" id="L31">    public double    getPesoKg()        { return pesoKg;        }</span>
+<span class="fc" id="L32">    public TipoEnvio getTipoEnvio()     { return tipoEnvio;     }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
